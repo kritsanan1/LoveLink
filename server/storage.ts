@@ -96,6 +96,12 @@ export class MemStorage implements IStorage {
         ...user,
         id,
         createdAt: new Date(),
+        location: user.location || null,
+        bio: user.bio || null,
+        jobTitle: user.jobTitle || null,
+        company: user.company || null,
+        photos: (user.photos as string[]) || null,
+        interests: (user.interests as string[]) || null,
       };
       this.users.set(id, fullUser);
     });
@@ -117,6 +123,12 @@ export class MemStorage implements IStorage {
       ...insertUser,
       id,
       createdAt: new Date(),
+      location: insertUser.location || null,
+      bio: insertUser.bio || null,
+      jobTitle: insertUser.jobTitle || null,
+      company: insertUser.company || null,
+      photos: (insertUser.photos as string[]) || null,
+      interests: (insertUser.interests as string[]) || null,
     };
     this.users.set(id, user);
     return user;
@@ -128,7 +140,16 @@ export class MemStorage implements IStorage {
       throw new Error("User not found");
     }
     
-    const updatedUser = { ...existingUser, ...updates };
+    const updatedUser: User = { 
+      ...existingUser, 
+      ...updates,
+      location: updates.location !== undefined ? updates.location : existingUser.location,
+      bio: updates.bio !== undefined ? updates.bio : existingUser.bio,
+      jobTitle: updates.jobTitle !== undefined ? updates.jobTitle : existingUser.jobTitle,
+      company: updates.company !== undefined ? updates.company : existingUser.company,
+      photos: updates.photos !== undefined ? (updates.photos as string[]) : existingUser.photos,
+      interests: updates.interests !== undefined ? (updates.interests as string[]) : existingUser.interests,
+    };
     this.users.set(id, updatedUser);
     return updatedUser;
   }
@@ -148,6 +169,7 @@ export class MemStorage implements IStorage {
       ...swipe,
       id,
       createdAt: new Date(),
+      isSuperLike: swipe.isSuperLike || null,
     };
     this.swipes.set(id, fullSwipe);
     return fullSwipe;

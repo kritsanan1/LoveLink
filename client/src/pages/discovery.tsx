@@ -221,8 +221,8 @@ export default function Discovery() {
       <MatchModal
         isOpen={showMatchModal}
         onClose={() => setShowMatchModal(false)}
-        currentUser={currentUser}
-        matchedUser={matchedUser}
+        currentUser={currentUser || undefined}
+        matchedUser={matchedUser || undefined}
         onSendMessage={() => {
           setShowMatchModal(false);
           // Navigate to chat - would be implemented with proper routing
