@@ -313,7 +313,6 @@ export default function Discovery() {
         onUpgrade={() => {
           setShowPremiumModal(false);
           // TODO: Implement premium upgrade
-          console.log("Upgrading to premium...");
         }}
       />
 
@@ -329,7 +328,6 @@ export default function Discovery() {
             if (superLikesRemaining > 0) {
               setSuperLikesRemaining(prev => prev - 1);
               setShowBoostManager(false);
-              console.log("Super like activated");
             }
           } else if (type === "profile_boost") {
             if (!activeBoosts.find(boost => boost.type === "profile_boost")) {
@@ -338,7 +336,6 @@ export default function Discovery() {
                 timeRemaining: "30:00"
               }]);
               setShowBoostManager(false);
-              console.log("Profile boost activated");
               
               // Simulate countdown (in real app, this would be handled server-side)
               setTimeout(() => {

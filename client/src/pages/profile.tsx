@@ -310,7 +310,7 @@ export default function Profile() {
         onClose={() => setShowPreferences(false)}
         onSave={(preferences) => {
           // TODO: Save user preferences
-          console.log("Saving preferences:", preferences);
+          setShowPreferences(false);
         }}
       />
     </div>
