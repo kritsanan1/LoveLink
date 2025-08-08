@@ -1,7 +1,7 @@
 import { motion, PanInfo, useMotionValue, useTransform } from "framer-motion";
 import { User } from "@shared/schema";
 import { useState } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, Shield, Crown } from "lucide-react";
 
 interface SwipeCardProps {
   user: User;
@@ -77,6 +77,22 @@ export default function SwipeCard({ user, onSwipe, style, isTop = false }: Swipe
           className="w-full h-full object-cover"
         />
         
+        {/* Badges */}
+        <div className="absolute top-4 right-4 flex space-x-2">
+          {user.verified && (
+            <div className="bg-tinder-blue text-white px-2 py-1 rounded-full flex items-center space-x-1 text-xs font-semibold">
+              <Shield className="w-3 h-3" />
+              <span>Verified</span>
+            </div>
+          )}
+          {user.premium && (
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-full flex items-center space-x-1 text-xs font-semibold">
+              <Crown className="w-3 h-3" />
+              <span>Premium</span>
+            </div>
+          )}
+        </div>
+
         {/* Photo indicators */}
         {user.photos && user.photos.length > 1 && (
           <div className="absolute top-4 left-4 right-4 flex space-x-1">
@@ -133,15 +149,49 @@ export default function SwipeCard({ user, onSwipe, style, isTop = false }: Swipe
         <h3 className="text-xl font-semibold text-gray-800">
           {user.name}, {user.age}
         </h3>
+        {user.jobTitle && user.company && (
+          <p className="text-gray-700 text-sm mt-1 font-medium">
+            {user.jobTitle} at {user.company}
+          </p>
+        )}
         {user.bio && (
           <p className="text-gray-600 text-sm mt-1 line-clamp-2">
             {user.bio}
+          </p>
+        )}
+        {user.education && (
+          <p className="text-gray-500 text-xs mt-1">
+            🎓 {user.education}
+          </p>
+        )}
+        {user.height && (
+          <p className="text-gray-500 text-xs mt-1">
+            📏 {user.height}cm
           </p>
         )}
         {user.location && (
           <div className="flex items-center mt-2 text-gray-500 text-sm">
             <MapPin className="w-4 h-4 mr-1" />
             <span>{user.location}</span>
+          </div>
+        )}
+        
+        {/* Interests */}
+        {user.interests && user.interests.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {user.interests.slice(0, 3).map((interest) => (
+              <span
+                key={interest}
+                className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full"
+              >
+                {interest}
+              </span>
+            ))}
+            {user.interests.length > 3 && (
+              <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
+                +{user.interests.length - 3} more
+              </span>
+            )}
           </div>
         )}
       </div>

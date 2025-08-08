@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Camera, Plus } from "lucide-react";
+import { Camera, Plus, Settings, Crown, Shield } from "lucide-react";
 import { User } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SAMPLE_INTERESTS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
+import PreferencesModal from "@/components/preferences-modal";
 
 // Mock current user ID
 const CURRENT_USER_ID = "current-user-123";
@@ -16,6 +17,7 @@ export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [showPreferences, setShowPreferences] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -125,6 +127,34 @@ export default function Profile() {
             )}
           </div>
           
+          {/* Profile Actions */}
+          <div className="absolute top-4 right-4 flex space-x-2">
+            <Button
+              onClick={() => setShowPreferences(true)}
+              size="sm"
+              variant="ghost"
+              className="bg-white/80 hover:bg-white text-gray-800 rounded-full"
+            >
+              <Settings className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* Status Badges */}
+          <div className="absolute top-4 left-4 flex space-x-2">
+            {user.verified && (
+              <div className="bg-tinder-blue text-white px-3 py-1 rounded-full flex items-center space-x-1 text-sm font-semibold">
+                <Shield className="w-4 h-4" />
+                <span>Verified</span>
+              </div>
+            )}
+            {user.premium && (
+              <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full flex items-center space-x-1 text-sm font-semibold">
+                <Crown className="w-4 h-4" />
+                <span>Premium</span>
+              </div>
+            )}
+          </div>
+
           {/* Photo Grid */}
           <div className="absolute bottom-4 left-4 right-4">
             <div className="grid grid-cols-6 gap-2">
@@ -252,8 +282,37 @@ export default function Profile() {
               "Save Changes"
             )}
           </Button>
+
+          {/* Premium Features Info */}
+          {!user.premium && (
+            <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-200">
+              <div className="flex items-center space-x-3 mb-2">
+                <Crown className="w-5 h-5 text-yellow-600" />
+                <h3 className="font-semibold text-gray-800">Upgrade to Premium</h3>
+              </div>
+              <p className="text-sm text-gray-600 mb-3">
+                Get unlimited likes, see who likes you, and boost your profile visibility
+              </p>
+              <Button 
+                variant="outline" 
+                className="w-full border-yellow-300 text-yellow-700 hover:bg-yellow-50"
+              >
+                Learn More
+              </Button>
+            </div>
+          )}
         </div>
       </form>
+
+      {/* Preferences Modal */}
+      <PreferencesModal
+        isOpen={showPreferences}
+        onClose={() => setShowPreferences(false)}
+        onSave={(preferences) => {
+          // TODO: Save user preferences
+          console.log("Saving preferences:", preferences);
+        }}
+      />
     </div>
   );
 }

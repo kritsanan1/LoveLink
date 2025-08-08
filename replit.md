@@ -1,8 +1,18 @@
-# Dating App
+# Dating App - HeartSync
 
 ## Overview
 
-This is a modern dating application built with React and Express, featuring a Tinder-like interface for discovering and matching with other users. The app supports swiping mechanics, real-time messaging, and user profile management. It's designed as a mobile-first application with a responsive design that works well on both mobile devices and desktop browsers.
+This is a comprehensive dating application built with React and Express, featuring a sophisticated Tinder-like interface for discovering and matching with other users. The app includes core dating functionality plus advanced premium features like location-based matching, profile boosting, detailed filtering, and user preferences. It's designed as a mobile-first application with a responsive design optimized for both mobile devices and desktop browsers.
+
+## Recent Changes (January 2025)
+
+### Advanced Features Added
+- **Premium Subscription System**: Crown badges, premium modals, and upgrade prompts
+- **Advanced Filtering**: Age range, distance, interests, education, and relationship type filters
+- **Profile Boosting**: Super likes and profile boost features with time tracking
+- **User Preferences**: Deal breakers, lifestyle preferences, and notification settings
+- **Enhanced Profile Data**: Location coordinates, education, height, verification status
+- **Sophisticated UI Components**: FilterModal, PremiumModal, PreferencesModal, and BoostCard
 
 ## User Preferences
 
@@ -36,9 +46,9 @@ The application uses a PostgreSQL database configured through Drizzle:
 
 - **Database**: PostgreSQL with Neon serverless database connection
 - **Migrations**: Drizzle Kit for database schema migrations
-- **Schema**: Four main tables - users, swipes, matches, and messages
-- **Current Implementation**: In-memory storage for development with sample data
-- **Production Ready**: Database configuration is set up but implementation uses memory storage pattern
+- **Enhanced Schema**: Six main tables - users, swipes, matches, messages, user_preferences, and boosts
+- **Current Implementation**: Advanced in-memory storage with comprehensive sample data
+- **Production Ready**: Database configuration is set up with full schema for premium features
 
 ### Authentication and Authorization
 Currently implements a simplified authentication system:
@@ -58,4 +68,14 @@ The application integrates several key external services and libraries:
 - **Drizzle ORM**: Type-safe database operations and migrations
 - **Zod**: Runtime type validation and schema definition
 
-The architecture supports easy scaling and deployment, with clear separation between client and server concerns, and a flexible storage layer that can be adapted for different database backends.
+### Premium Features & Monetization
+The application includes a comprehensive premium tier system:
+
+- **Premium Subscriptions**: Monthly subscription model with crown badges and exclusive features
+- **Advanced Filters**: Age range, distance, interests, education, and relationship type filtering
+- **Profile Boosting**: Time-limited profile boosts and super-like functionality
+- **Enhanced Discovery**: Location-based matching with coordinate tracking
+- **User Preferences**: Detailed deal-breaker and lifestyle preference management
+- **Notification Controls**: Granular notification settings for matches, messages, and likes
+
+The architecture supports easy scaling and deployment, with clear separation between client and server concerns, flexible storage layer, and a monetization-ready premium feature system that can be adapted for different database backends and payment processors.

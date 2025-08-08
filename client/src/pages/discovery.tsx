@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { X, Star, Heart, Bell, User as UserIcon } from "lucide-react";
+import { X, Star, Heart, Bell, User as UserIcon, Sliders, Crown } from "lucide-react";
 import SwipeCard from "@/components/swipe-card";
 import MatchModal from "@/components/match-modal";
+import FilterModal from "@/components/filter-modal";
+import PremiumModal from "@/components/premium-modal";
+import LikeCounter from "@/components/like-counter";
 import { User } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -15,6 +18,16 @@ export default function Discovery() {
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [matchedUser, setMatchedUser] = useState<User | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [filters, setFilters] = useState({
+    ageRange: [18, 35] as [number, number],
+    maxDistance: 25,
+    interests: [] as string[],
+    education: "",
+    lookingFor: "serious"
+  });
+  const [likesRemaining, setLikesRemaining] = useState(10);
   const queryClient = useQueryClient();
 
   // Fetch discovery users
@@ -97,11 +110,22 @@ export default function Discovery() {
     const isLike = direction === 'right' || direction === 'up';
     const isSuperLike = direction === 'up';
     
+    // Check premium status and likes remaining for likes
+    if (isLike && !currentUser?.premium && likesRemaining <= 0) {
+      setShowPremiumModal(true);
+      return;
+    }
+    
     swipeMutation.mutate({
       swipedUser: user,
       isLike,
       isSuperLike,
     });
+    
+    // Decrement likes for non-premium users
+    if (isLike && !currentUser?.premium) {
+      setLikesRemaining(prev => Math.max(0, prev - 1));
+    }
   };
 
   const handleActionButton = (action: 'pass' | 'superlike' | 'like') => {
@@ -129,9 +153,25 @@ export default function Discovery() {
     <div className="h-full flex flex-col">
       {/* Header */}
       <header className="gradient-bg p-4 text-white">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-bold">HeartSync</h1>
-          <div className="flex space-x-4">
+          <div className="flex space-x-2">
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="text-white hover:bg-white/10"
+              onClick={() => setShowFilterModal(true)}
+            >
+              <Sliders className="w-5 h-5" />
+            </Button>
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="text-white hover:bg-white/10"
+              onClick={() => setShowPremiumModal(true)}
+            >
+              <Crown className="w-5 h-5" />
+            </Button>
             <Button size="sm" variant="ghost" className="text-white hover:bg-white/10">
               <Bell className="w-5 h-5" />
             </Button>
@@ -139,6 +179,15 @@ export default function Discovery() {
               <UserIcon className="w-5 h-5" />
             </Button>
           </div>
+        </div>
+        
+        {/* Likes Counter */}
+        <div className="flex justify-center">
+          <LikeCounter
+            likesRemaining={likesRemaining}
+            isPremium={currentUser?.premium || false}
+            onUpgrade={() => setShowPremiumModal(true)}
+          />
         </div>
       </header>
 
@@ -228,6 +277,29 @@ export default function Discovery() {
           // Navigate to chat - would be implemented with proper routing
         }}
         onKeepSwiping={() => setShowMatchModal(false)}
+      />
+
+      {/* Filter Modal */}
+      <FilterModal
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        onApplyFilters={(newFilters) => {
+          setFilters(newFilters);
+          // TODO: Implement filtered discovery API call
+          refetch();
+        }}
+        currentFilters={filters}
+      />
+
+      {/* Premium Modal */}
+      <PremiumModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+        onUpgrade={() => {
+          setShowPremiumModal(false);
+          // TODO: Implement premium upgrade
+          console.log("Upgrading to premium...");
+        }}
       />
     </div>
   );
