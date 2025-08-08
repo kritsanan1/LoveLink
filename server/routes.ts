@@ -42,10 +42,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const limit = parseInt(req.query.limit as string) || 10;
-      const users = await storage.getDiscoveryUsers(userId, limit);
-      res.json(users);
+      const lat = parseFloat(req.query.lat as string);
+      const lon = parseFloat(req.query.lon as string);
+      const maxDistance = parseInt(req.query.maxDistance as string) || 25;
+
+      // Use location-based discovery if coordinates are provided
+      if (!isNaN(lat) && !isNaN(lon)) {
+        const users = await storage.getDiscoveryUsersWithLocation(userId, lat, lon, maxDistance, limit);
+        res.json(users);
+      } else {
+        const users = await storage.getDiscoveryUsers(userId, limit);
+        res.json(users);
+      }
     } catch (error) {
       res.status(500).json({ error: "Failed to get discovery users" });
+    }
+  });
+
+  // Location update route
+  app.put("/api/users/:userId/location", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { latitude, longitude, location } = req.body;
+
+      if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+        return res.status(400).json({ error: "Valid latitude and longitude are required" });
+      }
+
+      const updatedUser = await storage.updateUserLocation(userId, latitude, longitude, location);
+      res.json(updatedUser);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update user location" });
     }
   });
 

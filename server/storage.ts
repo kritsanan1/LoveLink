@@ -1,6 +1,19 @@
 import { type User, type InsertUser, type Swipe, type InsertSwipe, type Match, type Message, type InsertMessage, type UserPreferences, type InsertUserPreferences, type Boost, type InsertBoost } from "@shared/schema";
 import { randomUUID } from "crypto";
 
+// Distance calculation utility using Haversine formula
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
@@ -8,6 +21,8 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<InsertUser>): Promise<User>;
   getDiscoveryUsers(userId: string, limit?: number): Promise<User[]>;
+  getDiscoveryUsersWithLocation(userId: string, userLat: number, userLon: number, maxDistance: number, limit?: number): Promise<(User & { distance: number })[]>;
+  updateUserLocation(userId: string, latitude: number, longitude: number, location?: string): Promise<User>;
   
   // Swipe operations
   createSwipe(swipe: InsertSwipe): Promise<Swipe>;
@@ -449,6 +464,53 @@ export class MemStorage implements IStorage {
     }
 
     return availableUsers.slice(0, 10);
+  }
+
+  async getDiscoveryUsersWithLocation(
+    userId: string, 
+    userLat: number, 
+    userLon: number, 
+    maxDistance: number, 
+    limit: number = 10
+  ): Promise<(User & { distance: number })[]> {
+    const userSwipes = await this.getUserSwipes(userId);
+    const swipedUserIds = new Set(userSwipes.map(swipe => swipe.swipedId));
+    
+    const availableUsers = Array.from(this.users.values())
+      .filter(user => user.id !== userId && !swipedUserIds.has(user.id))
+      .filter(user => user.latitude && user.longitude) // Only users with location
+      .map(user => {
+        const distance = calculateDistance(
+          userLat,
+          userLon,
+          parseFloat(user.latitude as string),
+          parseFloat(user.longitude as string)
+        );
+        return { ...user, distance };
+      })
+      .filter(user => user.distance <= maxDistance)
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, limit);
+
+    return availableUsers;
+  }
+
+  async updateUserLocation(userId: string, latitude: number, longitude: number, location?: string): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const updatedUser: User = {
+      ...user,
+      latitude: latitude.toString(),
+      longitude: longitude.toString(),
+      location: location || user.location,
+      lastActive: new Date(),
+    };
+
+    this.users.set(userId, updatedUser);
+    return updatedUser;
   }
 }
 

@@ -170,10 +170,15 @@ export default function SwipeCard({ user, onSwipe, style, isTop = false }: Swipe
             📏 {user.height}cm
           </p>
         )}
-        {user.location && (
+        {(user.location || (user as any).distance !== undefined) && (
           <div className="flex items-center mt-2 text-gray-500 text-sm">
             <MapPin className="w-4 h-4 mr-1" />
-            <span>{user.location}</span>
+            <span>
+              {(user as any).distance !== undefined 
+                ? `${Math.round((user as any).distance)}km away`
+                : user.location
+              }
+            </span>
           </div>
         )}
         

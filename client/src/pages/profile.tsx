@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { SAMPLE_INTERESTS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import PreferencesModal from "@/components/preferences-modal";
+import LocationSettings from "@/components/location-settings";
 
 // Mock current user ID
 const CURRENT_USER_ID = "current-user-123";
@@ -302,6 +303,22 @@ export default function Profile() {
             </div>
           )}
         </div>
+
+        {/* Location Settings */}
+        <LocationSettings
+          userId={CURRENT_USER_ID}
+          currentLocation={user?.location || undefined}
+          currentMaxDistance={user?.maxDistance || 25}
+          onLocationUpdate={(newLocation, newMaxDistance) => {
+            if (user) {
+              setUser({
+                ...user,
+                location: newLocation,
+                maxDistance: newMaxDistance,
+              });
+            }
+          }}
+        />
       </form>
 
       {/* Preferences Modal */}

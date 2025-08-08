@@ -8,7 +8,10 @@ import FilterModal from "@/components/filter-modal";
 import PremiumModal from "@/components/premium-modal";
 import LikeCounter from "@/components/like-counter";
 import BoostManager from "@/components/boost-manager";
+import LocationPermission from "@/components/location-permission";
 import { User } from "@shared/schema";
+import { useGeolocation } from "@/hooks/use-geolocation";
+import { formatDistance } from "@/utils/location";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 
@@ -22,6 +25,8 @@ export default function Discovery() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showBoostManager, setShowBoostManager] = useState(false);
+  const [showLocationPermission, setShowLocationPermission] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number; city: string } | null>(null);
   const [filters, setFilters] = useState({
     ageRange: [18, 35] as [number, number],
     maxDistance: 25,
@@ -36,10 +41,35 @@ export default function Discovery() {
     timeRemaining: string;
   }>>([]);
   const queryClient = useQueryClient();
+  const { latitude, longitude, error: geoError } = useGeolocation();
+
+  // Check if location permission should be requested
+  useEffect(() => {
+    if (!userLocation && !geoError && latitude && longitude) {
+      setShowLocationPermission(true);
+    }
+  }, [latitude, longitude, geoError, userLocation]);
 
   // Fetch discovery users
   const { data: discoveryUsers = [], isLoading, refetch } = useQuery({
-    queryKey: ['/api/discovery', CURRENT_USER_ID],
+    queryKey: ['/api/discovery', CURRENT_USER_ID, userLocation?.lat, userLocation?.lon, filters.maxDistance],
+    queryFn: async () => {
+      let url = `/api/discovery/${CURRENT_USER_ID}`;
+      const params = new URLSearchParams();
+      
+      if (userLocation) {
+        params.append('lat', userLocation.lat.toString());
+        params.append('lon', userLocation.lon.toString());
+        params.append('maxDistance', filters.maxDistance.toString());
+      }
+      
+      if (params.toString()) {
+        url += '?' + params.toString();
+      }
+      
+      const response = await fetch(url);
+      return response.json();
+    },
     select: (data) => data as User[],
   });
 
@@ -343,6 +373,18 @@ export default function Discovery() {
               }, 30 * 60 * 1000); // 30 minutes
             }
           }
+        }}
+      />
+
+      {/* Location Permission Modal */}
+      <LocationPermission
+        userId={CURRENT_USER_ID}
+        isOpen={showLocationPermission}
+        onClose={() => setShowLocationPermission(false)}
+        onLocationGranted={(lat, lon, city) => {
+          setUserLocation({ lat, lon, city });
+          setShowLocationPermission(false);
+          refetch(); // Refresh discovery with location
         }}
       />
     </div>
