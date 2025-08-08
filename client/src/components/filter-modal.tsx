@@ -34,7 +34,7 @@ export default function FilterModal({
     ageRange: [18, 35],
     maxDistance: 25,
     interests: [],
-    education: "",
+    education: "any",
     lookingFor: "serious"
   }
 }: FilterModalProps) {
@@ -50,7 +50,7 @@ export default function FilterModal({
       ageRange: [18, 35] as [number, number],
       maxDistance: 25,
       interests: [],
-      education: "",
+      education: "any",
       lookingFor: "serious"
     };
     setFilters(defaultFilters);
@@ -172,7 +172,7 @@ export default function FilterModal({
                     <SelectValue placeholder="Select education level" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any</SelectItem>
+                    <SelectItem value="any">Any</SelectItem>
                     <SelectItem value="High School">High School</SelectItem>
                     <SelectItem value="Some College">Some College</SelectItem>
                     <SelectItem value="Bachelor's Degree">Bachelor's Degree</SelectItem>

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { X, Star, Heart, Bell, User as UserIcon, Sliders, Crown } from "lucide-react";
+import { X, Star, Heart, Bell, User as UserIcon, Sliders, Crown, Zap } from "lucide-react";
 import SwipeCard from "@/components/swipe-card";
 import MatchModal from "@/components/match-modal";
 import FilterModal from "@/components/filter-modal";
 import PremiumModal from "@/components/premium-modal";
 import LikeCounter from "@/components/like-counter";
+import BoostManager from "@/components/boost-manager";
 import { User } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -20,14 +21,20 @@ export default function Discovery() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showBoostManager, setShowBoostManager] = useState(false);
   const [filters, setFilters] = useState({
     ageRange: [18, 35] as [number, number],
     maxDistance: 25,
     interests: [] as string[],
-    education: "",
+    education: "any",
     lookingFor: "serious"
   });
   const [likesRemaining, setLikesRemaining] = useState(10);
+  const [superLikesRemaining, setSuperLikesRemaining] = useState(5);
+  const [activeBoosts, setActiveBoosts] = useState<Array<{
+    type: "profile_boost" | "super_boost";
+    timeRemaining: string;
+  }>>([]);
   const queryClient = useQueryClient();
 
   // Fetch discovery users
@@ -172,6 +179,14 @@ export default function Discovery() {
             >
               <Crown className="w-5 h-5" />
             </Button>
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="text-white hover:bg-white/10"
+              onClick={() => setShowBoostManager(true)}
+            >
+              <Zap className="w-5 h-5" />
+            </Button>
             <Button size="sm" variant="ghost" className="text-white hover:bg-white/10">
               <Bell className="w-5 h-5" />
             </Button>
@@ -299,6 +314,38 @@ export default function Discovery() {
           setShowPremiumModal(false);
           // TODO: Implement premium upgrade
           console.log("Upgrading to premium...");
+        }}
+      />
+
+      {/* Boost Manager */}
+      <BoostManager
+        isOpen={showBoostManager}
+        onClose={() => setShowBoostManager(false)}
+        isPremium={currentUser?.premium || false}
+        superLikesRemaining={superLikesRemaining}
+        activeBoosts={activeBoosts}
+        onActivateBoost={(type) => {
+          if (type === "super_like") {
+            if (superLikesRemaining > 0) {
+              setSuperLikesRemaining(prev => prev - 1);
+              setShowBoostManager(false);
+              console.log("Super like activated");
+            }
+          } else if (type === "profile_boost") {
+            if (!activeBoosts.find(boost => boost.type === "profile_boost")) {
+              setActiveBoosts(prev => [...prev, {
+                type: "profile_boost",
+                timeRemaining: "30:00"
+              }]);
+              setShowBoostManager(false);
+              console.log("Profile boost activated");
+              
+              // Simulate countdown (in real app, this would be handled server-side)
+              setTimeout(() => {
+                setActiveBoosts(prev => prev.filter(boost => boost.type !== "profile_boost"));
+              }, 30 * 60 * 1000); // 30 minutes
+            }
+          }
         }}
       />
     </div>

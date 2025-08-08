@@ -2,6 +2,7 @@ import { motion, PanInfo, useMotionValue, useTransform } from "framer-motion";
 import { User } from "@shared/schema";
 import { useState } from "react";
 import { MapPin, Shield, Crown } from "lucide-react";
+import ActivityIndicator from "./activity-indicator";
 
 interface SwipeCardProps {
   user: User;
@@ -173,6 +174,13 @@ export default function SwipeCard({ user, onSwipe, style, isTop = false }: Swipe
           <div className="flex items-center mt-2 text-gray-500 text-sm">
             <MapPin className="w-4 h-4 mr-1" />
             <span>{user.location}</span>
+          </div>
+        )}
+        
+        {/* Activity Status */}
+        {user.lastActive && (
+          <div className="mt-2">
+            <ActivityIndicator lastActive={user.lastActive} />
           </div>
         )}
         
